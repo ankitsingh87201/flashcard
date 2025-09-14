@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import Flashcard from "@/components/Flashcard";
@@ -13,7 +13,8 @@ const shuffleArray = (array) =>
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value);
 
-export default function PlayPage() {
+// Component that safely uses useSearchParams
+function PlayPageContent() {
   const [loading, setLoading] = useState(true);
   const [player, setPlayer] = useState(null);
   const [players, setPlayers] = useState([]);
@@ -42,28 +43,7 @@ export default function PlayPage() {
       setScores({ [email]: 0 });
 
       // Setup flashcards
-      setFlashcards([
-        { q: "Capital of France?", options: shuffleArray(["Paris", "London", "Berlin", "Madrid"]), a: "Paris" },
-        { q: "Largest planet?", options: shuffleArray(["Earth", "Mars", "Jupiter", "Venus"]), a: "Jupiter" },
-        { q: "ReactJS is used for?", options: shuffleArray(["Backend", "UI", "Database", "Networking"]), a: "UI" },
-        { q: "Fastest land animal?", options: shuffleArray(["Cheetah", "Lion", "Tiger", "Leopard"]), a: "Cheetah" },
-        { q: "H2O is?", options: shuffleArray(["Water", "Oxygen", "Hydrogen", "Helium"]), a: "Water" },
-        { q: "Light travels at?", options: shuffleArray(["3x10^8 m/s", "1x10^6 m/s", "5x10^7 m/s", "1x10^8 m/s"]), a: "3x10^8 m/s" },
-        { q: "Deepest ocean?", options: shuffleArray(["Pacific", "Atlantic", "Indian", "Arctic"]), a: "Pacific" },
-        { q: "Python is a?", options: shuffleArray(["Programming Language", "Snake", "Car", "Planet"]), a: "Programming Language" },
-        { q: "Square root of 64?", options: shuffleArray(["6", "7", "8", "9"]), a: "8" },
-        { q: "Author of 'Harry Potter'?", options: shuffleArray(["J.K. Rowling", "Tolkien", "Stephen King", "George Martin"]), a: "J.K. Rowling" },
-        { q: "Largest continent?", options: shuffleArray(["Asia", "Africa", "Europe", "Antarctica"]), a: "Asia" },
-        { q: "Chemical symbol for Gold?", options: shuffleArray(["Au", "Ag", "Gd", "Go"]), a: "Au" },
-        { q: "First man on the moon?", options: shuffleArray(["Neil Armstrong", "Buzz Aldrin", "Yuri Gagarin", "John Glenn"]), a: "Neil Armstrong" },
-        { q: "Fastest bird?", options: shuffleArray(["Peregrine Falcon", "Eagle", "Sparrow", "Ostrich"]), a: "Peregrine Falcon" },
-        { q: "Largest mammal?", options: shuffleArray(["Blue Whale", "Elephant", "Giraffe", "Hippopotamus"]), a: "Blue Whale" },
-        { q: "Currency of Japan?", options: shuffleArray(["Yen", "Dollar", "Euro", "Won"]), a: "Yen" },
-        { q: "Primary colors?", options: shuffleArray(["Red, Blue, Yellow", "Green, Purple, Orange", "Black, White, Gray", "Pink, Cyan, Magenta"]), a: "Red, Blue, Yellow" },
-        { q: "Pythagoras theorem applies to?", options: shuffleArray(["Right Triangle", "Circle", "Square", "Rectangle"]), a: "Right Triangle" },
-        { q: "Speed of sound approx?", options: shuffleArray(["343 m/s", "300 m/s", "150 m/s", "500 m/s"]), a: "343 m/s" },
-        { q: "Smallest prime number?", options: shuffleArray(["2", "1", "3", "0"]), a: "2" },
-      ]);
+      setFlashcards([ { q: "Capital of France?", options: shuffleArray(["Paris", "London", "Berlin", "Madrid"]), a: "Paris" }, { q: "Largest planet?", options: shuffleArray(["Earth", "Mars", "Jupiter", "Venus"]), a: "Jupiter" }, { q: "ReactJS is used for?", options: shuffleArray(["Backend", "UI", "Database", "Networking"]), a: "UI" }, { q: "Fastest land animal?", options: shuffleArray(["Cheetah", "Lion", "Tiger", "Leopard"]), a: "Cheetah" }, { q: "H2O is?", options: shuffleArray(["Water", "Oxygen", "Hydrogen", "Helium"]), a: "Water" }, { q: "Light travels at?", options: shuffleArray(["3x10^8 m/s", "1x10^6 m/s", "5x10^7 m/s", "1x10^8 m/s"]), a: "3x10^8 m/s" }, { q: "Deepest ocean?", options: shuffleArray(["Pacific", "Atlantic", "Indian", "Arctic"]), a: "Pacific" }, { q: "Python is a?", options: shuffleArray(["Programming Language", "Snake", "Car", "Planet"]), a: "Programming Language" }, { q: "Square root of 64?", options: shuffleArray(["6", "7", "8", "9"]), a: "8" }, { q: "Author of 'Harry Potter'?", options: shuffleArray(["J.K. Rowling", "Tolkien", "Stephen King", "George Martin"]), a: "J.K. Rowling" }, { q: "Largest continent?", options: shuffleArray(["Asia", "Africa", "Europe", "Antarctica"]), a: "Asia" }, { q: "Chemical symbol for Gold?", options: shuffleArray(["Au", "Ag", "Gd", "Go"]), a: "Au" }, { q: "First man on the moon?", options: shuffleArray(["Neil Armstrong", "Buzz Aldrin", "Yuri Gagarin", "John Glenn"]), a: "Neil Armstrong" }, { q: "Fastest bird?", options: shuffleArray(["Peregrine Falcon", "Eagle", "Sparrow", "Ostrich"]), a: "Peregrine Falcon" }, { q: "Largest mammal?", options: shuffleArray(["Blue Whale", "Elephant", "Giraffe", "Hippopotamus"]), a: "Blue Whale" }, { q: "Currency of Japan?", options: shuffleArray(["Yen", "Dollar", "Euro", "Won"]), a: "Yen" }, { q: "Primary colors?", options: shuffleArray(["Red, Blue, Yellow", "Green, Purple, Orange", "Black, White, Gray", "Pink, Cyan, Magenta"]), a: "Red, Blue, Yellow" }, { q: "Pythagoras theorem applies to?", options: shuffleArray(["Right Triangle", "Circle", "Square", "Rectangle"]), a: "Right Triangle" }, { q: "Speed of sound approx?", options: shuffleArray(["343 m/s", "300 m/s", "150 m/s", "500 m/s"]), a: "343 m/s" }, { q: "Smallest prime number?", options: shuffleArray(["2", "1", "3", "0"]), a: "2" }, ]);
       setLoading(false);
     };
     init();
@@ -81,8 +61,6 @@ export default function PlayPage() {
       if (questionIndex + 1 === flashcards.length) {
         setGameEnded(true);
         setConfetti(true);
-
-        // Save match to API
         saveMatch();
       } else {
         setQuestionIndex((prev) => prev + 1);
@@ -92,7 +70,6 @@ export default function PlayPage() {
     }, 800);
   };
 
-  // Function to save match and trigger leaderboard update
   const saveMatch = async () => {
     try {
       const payload = {
@@ -106,8 +83,6 @@ export default function PlayPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
-      // Trigger Leaderboard refresh
       window.dispatchEvent(new Event("matchSaved"));
     } catch (err) {
       console.error("Failed to save match", err);
@@ -198,5 +173,14 @@ export default function PlayPage() {
         </div>
       )}
     </main>
+  );
+}
+
+// 👇 Wrap PlayPageContent inside Suspense
+export default function PlayPage() {
+  return (
+    <Suspense fallback={<p className="text-center mt-20">Loading...</p>}>
+      <PlayPageContent />
+    </Suspense>
   );
 }
