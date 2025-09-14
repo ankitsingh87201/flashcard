@@ -21,7 +21,7 @@ export async function POST(req) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
-import { supabase } from "@/lib/supabaseClient";
+
 
 export async function POST(req) {
   const { searchParams } = new URL(req.url);
